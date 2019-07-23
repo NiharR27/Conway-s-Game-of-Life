@@ -1,0 +1,239 @@
+using System;
+using System.Threading;
+
+namespace Life
+{
+    /// <summary>
+    /// Contains methods used to run Conway's Game of Life
+    /// </summary>
+    /// <author>
+    /// STUDENT NAME : Nihar Hasmukhbhai Rupareliya (n10355243)
+    /// </author>
+    public static class Conway
+    {
+        public const int GRID_COLUMN = 50;
+        public const int GRID_ROW = 20;
+        public const int COUNT_NEIGH_ROW = 10;
+        public const int COUNT_NEIGH_COLUMN = 20;
+        public const int SLEEPING_TIME = 120;
+        public const double HALF_VALUE = 0.5;
+        /// <summary>
+        /// A random number generator used during creation
+        /// </summary>
+        private static Random rng = new Random();
+
+        /// <summary>
+        /// Runs the game of life according to its rules and continuously refreshes the result
+        /// </summary>
+        public static void Main()
+        {
+            // A boolean array that stores the boolean array of given grid_row and grid_column with 50% chances of
+            // each.
+            bool[,] firstGrid = MakeGrid(GRID_ROW, GRID_COLUMN);
+            // Method DrawGrid draws the result which is returned by MakeGrid (with all the instructions) of given row and column
+            DrawGrid(firstGrid);
+            // Count Neighbhour method counts the neigher for given grid, row and column
+            CountNeighbours(firstGrid, COUNT_NEIGH_ROW, COUNT_NEIGH_COLUMN);
+            // The do-while loop helps the update grid method to repeat again and again till the condition
+            // is true or their is no more possibilities where the grid is updated.
+
+            //clearing the grid before going to do-while loop to avoid the updated grid to be printed on the bottom
+            // of the original grid from the beginning.
+            Console.Clear();
+           do
+            {
+                // Giving grid to the method UpdateGride method which inturn returns an upgraded grid.
+                firstGrid = UpdateGrid(firstGrid);
+                // drawing the upgraded grid.
+                DrawGrid(firstGrid);
+                //waiting time between each grid.
+                System.Threading.Thread.Sleep(SLEEPING_TIME);
+                //clearing the screen, so that the next grid is created at the same place
+                Console.Clear();
+            } /* Repeating action till no possibilities are left for cell to move within the grid */ while (true);
+            }
+
+
+        /// <summary>
+        /// Returns a new grid for Conway's Game of life using the given dimensions.
+        /// Each cell has a 50% chance of initially being alive.
+        /// </summary>
+        /// <param name="rows">The desired number of rows</param>
+        /// <param name="cols">The desired number of columns</param>
+        /// <returns>returns a random boolean array of give row and column</returns>
+        public static bool[,] MakeGrid(int rows, int cols)
+        {
+            // a double number which will hold value between 0-1.
+            double referenceNum;
+
+           // Creating array of given row and columb
+            bool[,] firstGrid = new bool[rows, cols];
+
+            // Going through the given column and row
+            for (int row = 0; row < firstGrid.GetLength(0); ++row)
+            {
+                for (int col = 0; col < firstGrid.GetLength(1); ++col)
+                {
+                    //Getting a random double number between 0 and 1
+                    referenceNum = rng.NextDouble() * (1.0 - 0.0);
+
+                    // Just randomly dividing values to half and assigning them to True and False respectively.
+
+                    //if value is grater than 0.5 then it's true or the cell is alive.
+                    if (Math.Round(referenceNum, 1+1) > HALF_VALUE)
+                    {
+                        firstGrid[row, col] = true;
+                    }
+                    //if value is less than 0.5 then it's false or the cell is dead.
+                    if (Math.Round(referenceNum, 1+1) < HALF_VALUE)
+                    {
+
+                        firstGrid[row, col] = false;
+
+                    }
+
+                }
+
+            }
+
+            // returning the informative grid which has random false-true array.
+            return firstGrid;
+        }
+
+
+
+        /// <summary>
+        /// Writes the given game grid to standard output
+        /// </summary>
+        /// <param name="grid">The grid to draw to standard output</param>
+        public static void DrawGrid(bool[,] grid)
+        {
+            //going through each row and column.
+            for (int row = 0; row < grid.GetLength(0); row++)
+            {
+                for (int col = 0; col < grid.GetLength(1); col++)
+                {
+                    // if that particular part of grid is false or it is dead, then we assign it with symbol "." OR dot.
+                    if (grid[row, col] == false)
+                    {
+                        Console.Write(".");
+                    }
+                    // if that particular part of grid is true or it is living than we assign it with symbol "#" OR hash.
+                    if (grid[row, col] == true)
+                    {
+                        Console.Write("#");
+                    }
+                }
+                //leaving line after each row
+                Console.WriteLine();
+            }
+        }
+
+
+
+        /// <summary>
+        /// Returns the number of living neighbours adjacent to a given cell position
+        /// </summary>
+        /// <param name="grid">The game grid</param>
+        /// <param name="row">The cell's row</param>
+        /// <param name="col">The cell's column</param>
+        /// <returns>The number of adjacent living neighbours</returns>
+        public static int CountNeighbours(bool[,] grid, int rows, int cols)
+        {
+            // initializing a variable which will hold total number of variable.
+            int total = 0;
+            // going through the particular row and column that user input, in order to count it's neighbours directly without
+            //going through each row
+            for (int row = rows - 1; row <= rows + 1; row++)
+            {
+                // For corner cell, where i < 0 so there is no neighbour possible for it. i.e. if we get to that cell than the program will just
+                //skip the part where i < 0.
+                if (row < 0 || row >= grid.GetLength(0))
+                {
+                    continue;
+                }
+                for (int col = cols - 1; col <= cols + 1; col++)
+                {
+
+                    // for corner cell, where j < 0 so there is no neighbour possible for it. i.e. if we get to that cell than the program will just
+                    //skip the part where j <0.
+                    if (col < 0 || col >= grid.GetLength(1))
+                    {
+                        continue;
+                    }
+                    //Neglecting the part on which we currently are on.
+                    else if (col == cols && row == rows)
+                    {
+                        continue;
+                    }
+                    // if their is any surrounding true cell or alive cell then we add it to the total variable.
+                    else if (grid[row, col] == true)
+                    {
+                        total++;
+                    }
+                }
+            }
+
+            // returning the int value named total.
+            return total;
+        }
+        
+
+        /// <summary>
+        /// Returns an updated grid after progressing the rules of the Game of Life.
+        /// </summary>
+        /// <param name="grid">The original grid from which the new grid is derived</param>
+        /// <returns>A new grid which has been updated by one time-step</returns>
+        public static bool[,] UpdateGrid(bool[,] grid)
+           {
+
+            /* 
+            Any live cell with fewer than two live neighbors dies, as if by underpopulation.
+            Any live cell with two or three live neighbors lives on to the next generation.
+            Any live cell with more than three live neighbors dies, as if by overpopulation.
+            Any dead cell with exactly three live neighbors becomes a live cell, as if by reproduction.
+            */
+
+            // Creating a new array named new_grid which has same length as grid (old array)
+            bool[,] new_grid = new bool[grid.GetLength(0), grid.GetLength(1)];
+            
+
+            // going through each row and column
+            for (int row = 0; row < new_grid.GetLength(0); row++)
+            {
+                for (int col =0; col < new_grid.GetLength(1); col++)
+                {
+                    // counting neighbour for each row and column that we are going through
+                    int neighbours = CountNeighbours(grid, row, col);
+
+                    // First & Third rule: If live cell has less than two neighbours or greater than 3 neighbours than
+                    // it will die of underpopulation and overpopulation respectively, and thus putting the value false there OR "." symbol.
+                    if (((neighbours < 2 ) || neighbours > 3 ) && (grid[row,col] == true))
+                    {
+                        new_grid[row, col] = false;
+                    }
+
+                    // second rule: If the live cell has exactly 2 or 3 neighbours then it stays on for next generation i.e. it stays true OR "#".
+                    if ((((neighbours == 2) ||
+                       (neighbours == 3))) &&
+                       (grid[row, col] == true))
+
+                    {
+                        new_grid[row, col] = true;
+                    }
+
+                    // Fourth rule: if the dead cell has exactly three neighbour then by reproduction rule, it generates the live cell at 
+                    // the current position thus the dead cell turns from "." to "#".
+                     if ((neighbours == 3) && (grid[row, col] == false))
+                    {
+                       new_grid[row, col] = true;
+                     }
+
+                    
+                  }
+            }
+            // returns the new_grid which will replace the result.
+               return new_grid;
+        }
+    }
+}
